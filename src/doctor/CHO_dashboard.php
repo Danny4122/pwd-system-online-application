@@ -1,16 +1,78 @@
 <?php
-// src/cho/CHO_dashboard.php  (adjust path/name if needed)
+/** CHO Dashboard - displays statistics and charts from database. */
 session_start();
+require_once __DIR__ . '/../../config/db.php';
+require_once __DIR__ . '/../../config/paths.php';
 
-// (Optional) If you use your central paths constant, you can require it here.
-// require_once __DIR__ . '/../../config/paths.php';
-
-// Pull username and role from session safely
 $username = isset($_SESSION['username']) ? (string) $_SESSION['username'] : null;
 $role = isset($_SESSION['role']) ? (string) $_SESSION['role'] : null;
 
-// Helper to escape output
 function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE); }
+
+// Get statistics from database
+$stats = [
+    'pwds' => 0,
+    'new' => 0,
+    'renew' => 0,
+    'lost_id' => 0
+];
+
+// Count total approved PWDs (members)
+$pwdRes = @pg_query($conn, "SELECT COUNT(*) FROM application WHERE status = 'Approved'");
+if ($pwdRes) {
+    $stats['pwds'] = (int)pg_fetch_result($pwdRes, 0, 0);
+}
+
+// Count new applications (case-insensitive, cast enum to text)
+$newRes = @pg_query($conn, "SELECT COUNT(*) FROM application WHERE LOWER(application_type::text) = 'new'");
+if ($newRes) {
+    $stats['new'] = (int)pg_fetch_result($newRes, 0, 0);
+}
+
+// Count renewal applications
+$renewRes = @pg_query($conn, "SELECT COUNT(*) FROM application WHERE LOWER(application_type::text) = 'renewal'");
+if ($renewRes) {
+    $stats['renew'] = (int)pg_fetch_result($renewRes, 0, 0);
+}
+
+// Count lost ID applications
+$lostRes = @pg_query($conn, "SELECT COUNT(*) FROM application WHERE LOWER(application_type::text) = 'lost id'");
+if ($lostRes) {
+    $stats['lost_id'] = (int)pg_fetch_result($lostRes, 0, 0);
+}
+
+// Get monthly data for chart (last 12 months)
+$chartData = [
+    'new' => array_fill(0, 12, 0),
+    'renew' => array_fill(0, 12, 0),
+    'lost_id' => array_fill(0, 12, 0)
+];
+$monthLabels = [];
+
+for ($i = 11; $i >= 0; $i--) {
+    $date = new DateTime();
+    $date->modify("-$i months");
+    $monthLabels[] = $date->format('M Y');
+    $monthStart = $date->format('Y-m-01');
+    $monthEnd = $date->format('Y-m-t');
+
+    $idx = 11 - $i;
+
+    // New applications for this month
+    $sql = "SELECT COUNT(*) FROM application WHERE LOWER(application_type::text) = 'new' AND application_date BETWEEN '$monthStart' AND '$monthEnd'";
+    $res = @pg_query($conn, $sql);
+    if ($res) $chartData['new'][$idx] = (int)pg_fetch_result($res, 0, 0);
+
+    // Renewal applications for this month
+    $sql = "SELECT COUNT(*) FROM application WHERE LOWER(application_type::text) = 'renewal' AND application_date BETWEEN '$monthStart' AND '$monthEnd'";
+    $res = @pg_query($conn, $sql);
+    if ($res) $chartData['renew'][$idx] = (int)pg_fetch_result($res, 0, 0);
+
+    // Lost ID applications for this month
+    $sql = "SELECT COUNT(*) FROM application WHERE LOWER(application_type::text) = 'lost id' AND application_date BETWEEN '$monthStart' AND '$monthEnd'";
+    $res = @pg_query($conn, $sql);
+    if ($res) $chartData['lost_id'][$idx] = (int)pg_fetch_result($res, 0, 0);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,7 +88,7 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE
   <link rel="stylesheet" href="../../assets/css/global/base.css">
   <link rel="stylesheet" href="../../assets/css/global/layout.css">
   <link rel="stylesheet" href="../../assets/css/global/component.css">
-  
+
 </head>
 <body>
   <!-- Sidebar -->
@@ -38,7 +100,7 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE
     </div>
     <hr>
 
-    <a class="active">
+    <a href="CHO_dashboard.php" class="active">
       <i class="fas fa-chart-line me-2"></i><span>Dashboard</span>
     </a>
 
@@ -59,33 +121,27 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE
       </div>
 
       <div class="submenu">
-
-        <!-- ACCEPTED -->
-        <a href="../doctor/accepted.php" class="submenu-link d-flex align-items-center ps-4"
+        <a href="accepted.php" class="submenu-link d-flex align-items-center ps-4"
            style="padding-top: 3px; padding-bottom: 3px; margin: 5px 0;">
           <span class="icon" style="width: 18px;"><i class="fas fa-user-check"></i></span>
           <span class="ms-2">Accepted</span>
         </a>
 
-        <!-- PENDING -->
-        <a href="../doctor/pending.php" class="submenu-link d-flex align-items-center ps-4"
+        <a href="pending.php" class="submenu-link d-flex align-items-center ps-4"
            style="padding-top: 3px; padding-bottom: 3px; margin: 5px 0;">
           <span class="icon" style="width: 18px;"><i class="fas fa-hourglass-half"></i></span>
           <span class="ms-2">Pending</span>
         </a>
 
-        <!-- DENIED -->
-        <a href="../doctor/denied.php" class="submenu-link d-flex align-items-center ps-4"
+        <a href="denied.php" class="submenu-link d-flex align-items-center ps-4"
            style="padding-top: 3px; padding-bottom: 3px; margin: 5px 0;">
           <span class="icon" style="width: 18px;"><i class="fas fa-user-times"></i></span>
           <span class="ms-2">Denied</span>
         </a>
-
       </div>
     </div>
 
-    <!-- LOGOUT -->
-    <a href="../doctor/logout.php">
+    <a href="logout.php">
       <i class="fas fa-sign-out-alt me-2"></i><span>Logout</span>
     </a>
 
@@ -104,8 +160,6 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE
           <strong><?= h($username ?? 'User') ?></strong>
           <i class="fas fa-user-circle ms-3 me-2 mb-2 mt-2" style="font-size: 2.5rem;"></i>
         </div>
-
-
       </div>
     </div>
 
@@ -113,28 +167,28 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE
       <div class="card-stat">
         <div>
           <small>PWDs</small>
-          <h3>1025</h3>
+          <h3><?= $stats['pwds'] ?></h3>
         </div>
         <i class="fas fa-users"></i>
       </div>
       <div class="card-stat">
         <div>
           <small>NEW</small>
-          <h3>44</h3>
+          <h3><?= $stats['new'] ?></h3>
         </div>
         <i class="fas fa-user-plus"></i>
       </div>
       <div class="card-stat">
         <div>
           <small>RENEW</small>
-          <h3>150</h3>
+          <h3><?= $stats['renew'] ?></h3>
         </div>
         <i class="fas fa-id-card"></i>
       </div>
       <div class="card-stat">
         <div>
           <small>LOST ID</small>
-          <h3>65</h3>
+          <h3><?= $stats['lost_id'] ?></h3>
         </div>
         <i class="fas fa-id-badge"></i>
       </div>
@@ -153,11 +207,11 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE
     new Chart(ctx, {
       type: 'line',
       data: {
-        labels: Array.from({ length: 12 }, (_, i) => `Month ${i + 1}`),
+        labels: <?= json_encode($monthLabels) ?>,
         datasets: [
           {
             label: 'New Applications',
-            data: [400, 200, 500, 250, 700, 450, 100, 600, 300, 700, 500, 400],
+            data: <?= json_encode($chartData['new']) ?>,
             backgroundColor: 'rgba(66, 135, 245, 0.3)',
             borderColor: '#4287f5',
             borderWidth: 2,
@@ -170,7 +224,7 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE
           },
           {
             label: 'Renew Applications',
-            data: [750, 600, 700, 900, 950, 850, 300, 700, 200, 600, 700, 500],
+            data: <?= json_encode($chartData['renew']) ?>,
             backgroundColor: 'rgba(102, 51, 255, 0.3)',
             borderColor: '#6633ff',
             borderWidth: 2,
@@ -183,7 +237,7 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE
           },
           {
             label: 'Lost ID Applications',
-            data: [150, 120, 180, 210, 170, 160, 140, 220, 180, 250, 230, 210],
+            data: <?= json_encode($chartData['lost_id']) ?>,
             backgroundColor: 'rgba(255, 99, 132, 0.3)',
             borderColor: '#FF6384',
             borderWidth: 2,
@@ -245,16 +299,17 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    document.querySelectorAll('.toggle-btn').forEach(btn => {
+    document.querySelectorAll('.sidebar-item .toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const submenu = btn.nextElementSibling;
         const icon = btn.querySelector('.chevron-icon');
-        submenu.style.maxHeight = submenu.style.maxHeight ? null : submenu.scrollHeight + "px";
-        icon.classList.toggle('rotate');
+        if (submenu) {
+          submenu.style.maxHeight = submenu.style.maxHeight ? null : submenu.scrollHeight + "px";
+        }
+        if (icon) icon.classList.toggle('rotate');
       });
     });
 
-    // Toggle Sidebar visibility
     function toggleSidebar() {
       const sidebar = document.querySelector('.sidebar');
       const main = document.querySelector('.main');

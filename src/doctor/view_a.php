@@ -294,6 +294,11 @@ $history_rows = $hist_res && pg_num_rows($hist_res) ? pg_fetch_all($hist_res) : 
         </div>
 
         <!-- CHO action form -->
+        <?php
+        $currentStatus = $application['status'] ?? 'Pending';
+        $canTakeAction = !in_array($currentStatus, ['Approved', 'Denied', 'CHO Rejected', 'CHO Verified']);
+        ?>
+        <?php if ($canTakeAction): ?>
         <form id="cho-action-form" method="post" action="<?= h((defined('APP_BASE_URL') ? rtrim(APP_BASE_URL, '/') : '') . '/api/admin_action.php') ?>" class="mt-4">
           <input type="hidden" name="application_id" value="<?= h($app_id) ?>">
           <input type="hidden" name="csrf_token" value="<?= h($_SESSION['csrf_token']) ?>">
@@ -305,9 +310,14 @@ $history_rows = $hist_res && pg_num_rows($hist_res) ? pg_fetch_all($hist_res) : 
           <div class="d-flex align-items-center">
             <button type="button" class="btn btn-success me-2" data-action="cho_verify">Verify (confirm PWD)</button>
             <button type="button" class="btn btn-danger me-2" data-action="cho_reject">Reject</button>
-            <a href="<?= h((defined('APP_BASE_URL') ? rtrim(APP_BASE_URL, '/') : '') . '/src/doctor/accepted.php') ?>" class="btn btn-outline-secondary">Back to list</a>
+            <a href="<?= h((defined('APP_BASE_URL') ? rtrim(APP_BASE_URL, '/') : '') . '/src/doctor/applications.php') ?>" class="btn btn-outline-secondary">Back to list</a>
           </div>
         </form>
+        <?php else: ?>
+        <div class="mt-4">
+          <a href="<?= h((defined('APP_BASE_URL') ? rtrim(APP_BASE_URL, '/') : '') . '/src/doctor/applications.php') ?>" class="btn btn-outline-secondary">Back to list</a>
+        </div>
+        <?php endif; ?>
 
       </div>
     </div>

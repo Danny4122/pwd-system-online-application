@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: pdao_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: thesisit
+      POSTGRES_DB: pdao_db
+    ports:
+      - "5440:5432"
+    volumes:
+      - pdao_data:/var/lib/postgresql/data
+      - ./docker/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pdao_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  php:
+    image: php:8.2-apache
+    container_name: pdao_php
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html/PWD-Application-System
+    working_dir: /var/www/html/PWD-Application-System
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: pdao_db
+      DB_USER: postgres
+      DB_PASSWORD: thesisit
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      bash -c "
+        apt-get update && apt-get install -y libpq-dev &&
+        docker-php-ext-install pgsql pdo_pgsql &&
+        a2enmod rewrite &&
+        sed -i 's|/var/www/html|/var/www/html/PWD-Application-System|g' /etc/apache2/sites-available/000-default.conf &&
+        echo '<Directory /var/www/html/PWD-Application-System>' >> /etc/apache2/apache2.conf &&
+        echo '  AllowOverride All' >> /etc/apache2/apache2.conf &&
+        echo '</Directory>' >> /etc/apache2/apache2.conf &&
+        apache2-foreground
+      "
+
+volumes:
+  pdao_data:

@@ -26,7 +26,7 @@ if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], (str
 }
 
 // Check logged in role (adjust depending on where you store role)
-$session_role = strtoupper($_SESSION['role'] ?? ($_SESSION['user_role'] ?? ($_SESSION['is_admin'] ? 'ADMIN' : '')));
+$session_role = strtoupper($_SESSION['role'] ?? ($_SESSION['user_role'] ?? (!empty($_SESSION['is_admin']) ? 'ADMIN' : '')));
 
 if (!isset($workflow[$action])) {
     http_response_code(400);

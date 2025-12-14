@@ -1,14 +1,11 @@
 <?php
-
-$host = "localhost";
-$dbname = "pdao_db";  // Your actual database name
-$user = "postgres";            // PostgreSQL username
-$password = "thesisit";  // Your PostgreSQL password
+$host = "pdao_postgres";
+$dbname = "pdao_db";
+$user = "postgres";
+$password = "thesisit";
 
 $conn = pg_connect("host=$host dbname=$dbname user=$user password=$password");
 
 if (!$conn) {
-    die("❌ Database connection failed: " . pg_last_error());
+    die("Database connection failed: " . pg_last_error($conn));
 }
-?>
-    

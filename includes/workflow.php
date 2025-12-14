@@ -24,8 +24,8 @@ return [
 
     // CHO actions
     'cho_verify' => [
-        'to_status' => 'CHO Verified',
-        'allowed_roles' => ['CHO','DOCTOR'],
+        'to_status' => 'Approved',
+        'allowed_roles' => ['CHO','DOCTOR','ADMIN'],
         'require_remarks' => false,
         'redirect' => '/src/doctor/accepted.php'
     ],
