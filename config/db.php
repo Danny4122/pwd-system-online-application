@@ -1,17 +1,37 @@
 <?php
-$host = getenv('DB_HOST') ?: 'localhost';
-$port = getenv('DB_PORT') ?: '5432';
-$dbname = getenv('DB_NAME') ?: 'pdao_db';
-$user = getenv('DB_USER') ?: getenv('USER') ?: 'postgres';
-$password = getenv('DB_PASS') ?: '';
+$dbHost = getenv('DB_HOST') ?: 'localhost';
+$dbPort = getenv('DB_PORT') ?: '5432';
+$dbName = getenv('DB_NAME') ?: 'pdao_db';
+$dbUser = getenv('DB_USER') ?: getenv('USER') ?: 'postgres';
+$dbPassword = getenv('DB_PASS') ?: getenv('DB_PASSWORD') ?: '';
 
-$connectionString = "host=$host port=$port dbname=$dbname user=$user";
-if ($password !== '') {
-    $connectionString .= " password=$password";
+$databaseUrl = getenv('DATABASE_URL');
+if ($databaseUrl !== false && !empty($databaseUrl)) {
+    $components = parse_url($databaseUrl);
+    if ($components !== false) {
+        $dbHost = $components['host'] ?? $dbHost;
+        $dbPort = $components['port'] ?? $dbPort;
+        $dbName = ltrim($components['path'] ?? $dbName, '/');
+        $dbUser = $components['user'] ?? $dbUser;
+        $dbPassword = $components['pass'] ?? $dbPassword;
+    }
+}
+
+$connectionString = sprintf(
+    'host=%s port=%s dbname=%s user=%s',
+    $dbHost,
+    $dbPort,
+    $dbName,
+    $dbUser
+);
+
+if ($dbPassword !== '') {
+    $connectionString .= ' password=' . $dbPassword;
 }
 
 $conn = pg_connect($connectionString);
-
 if (!$conn) {
-    die("Database connection failed: " . pg_last_error($conn));
+    error_log('Database connection failed: ' . pg_last_error());
+    http_response_code(500);
+    exit('Database unavailable. Please try again later.');
 }

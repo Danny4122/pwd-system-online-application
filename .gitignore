@@ -1,0 +1,9 @@
+.env
+.env.*
+/vendor
+/node_modules
+/.idea
+/.vscode
+/.DS_Store
+Thumbs.db
+pdao_data

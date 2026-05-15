@@ -1,0 +1,16 @@
+.git
+.gitignore
+docker/
+.dockerignore
+README.md
+README*
+*.md
+tests/
+*.log
+*.sql
+.env
+.env.*
+node_modules/
+vendor/
+**/.DS_Store
+**/Thumbs.db

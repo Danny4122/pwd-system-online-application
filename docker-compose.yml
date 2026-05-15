@@ -23,29 +23,14 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - .:/var/www/html/PWD-Application-System
-      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini 
+      - .:/var/www/html/PWD-Application-System:cached
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     working_dir: /var/www/html/PWD-Application-System
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: pdao_db
-      DB_USER: postgres
-      DB_PASSWORD: thesisit
     depends_on:
       postgres:
         condition: service_healthy
-    command: >
-      bash -c "
-        apt-get update && apt-get install -y libpq-dev &&
-        docker-php-ext-install pgsql pdo_pgsql &&
-        a2enmod rewrite &&
-        sed -i 's|DocumentRoot .*|DocumentRoot /var/www/html/PWD-Application-System|' /etc/apache2/sites-available/000-default.conf &&
-        echo '<Directory /var/www/html/PWD-Application-System>' >> /etc/apache2/apache2.conf &&
-        echo '  AllowOverride All' >> /etc/apache2/apache2.conf &&
-        echo '</Directory>' >> /etc/apache2/apache2.conf &&
-        apache2-foreground
-      "
+    restart: unless-stopped
+    command: ["apache2-foreground"]
 
 volumes:
   pdao_data:
