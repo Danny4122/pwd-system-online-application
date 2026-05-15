@@ -150,7 +150,7 @@ $isLoggedIn = isset($_SESSION['applicant_id']);
       Welcome to the PWD Online ID Application — a digital space where accessibility meets simplicity.
       Apply, connect, and stay informed all in one place.
     </p>
-    <a href="<?php echo 'http://' . $_SERVER['HTTP_HOST'] . '/public/login_form.php'; ?>"  class="mt-8 inline-block bg-[#4177B2] text-white font-semibold px-8 py-3 rounded-[30px] shadow border border-black hover:bg-[#3577e6] transition">
+    <a href="/public/login_form.php" class="mt-8 inline-block bg-[#4177B2] text-white font-semibold px-8 py-3 rounded-[30px] shadow border border-black hover:bg-[#3577e6] transition">
       Get Started
     </a>
   </section>

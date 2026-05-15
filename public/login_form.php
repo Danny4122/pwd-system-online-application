@@ -39,7 +39,7 @@
           <a href="#" class="forgot d-block text-start mb-1">I forgot my password</a>
           <p class="text-start mb-2" style="font-size: 0.85rem; color: #245c9a;">
             Don't have an account yet?
-          <a href="<?php echo 'http://' . $_SERVER['HTTP_HOST'] . '/public/signup_form.php'; ?>" class="sign-up-link fw-semibold text-primary">Sign up</a>
+          <a href="/public/signup_form.php" class="sign-up-link fw-semibold text-primary">Sign up</a>
           </p>
 
           <button type="submit" class="btn btn-login">Sign In</button>
