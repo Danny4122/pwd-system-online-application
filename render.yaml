@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: pwd-application
+    env: php
+    buildCommand: composer install
+    startCommand: "php -S 0.0.0.0:8000"
+    domains:
+      - pwd-application.render.com
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: pwd_postgres
+          property: host
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_NAME
+        value: pdao_db
+      - key: DB_USER
+        fromDatabase:
+          name: pwd_postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: pwd_postgres
+          property: password
+
+  - type: pserv
+    name: pwd_postgres
+    env: postgres
+    plan: free
+    ipAllowList: []
+    region: oregon

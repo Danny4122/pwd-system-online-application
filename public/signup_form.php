@@ -8,7 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
-  <link rel="stylesheet" href="../../assets/css/global/login_signup.css">
+  <link rel="stylesheet" href="/assets/css/global/login_signup.css">
 
 </head>
 
@@ -20,16 +20,16 @@
       <div class="left-content">
         <h1>Welcome to PWD<br>Online Application</h1>
         <p>Start your PWD application — create your account today.</p>
-        <img src="../../assets/pictures/PWD.png" alt="PWD Illustration">
+        <img src="/assets/pictures/PWD.png" alt="PWD Illustration">
       </div>
     </div>
 
 <!-- Right Section -->
 <div class="right-panel">
   <div class="login-card">
-    <img src="../../assets/pictures/Logo.jpg" class="logo" alt="PWD Logo">
+    <img src="/assets/pictures/Logo.jpg" class="logo" alt="PWD Logo">
     <p class="intro-text">Sign up to start your PWD registration journey.</p>
-    <form action="../../backend/auth/signup.php" method="POST">
+    <form action="/backend/auth/signup.php" method="POST">
       
       <div class="form-group">
         <input type="text" name="first_name" class="form-control" placeholder="First Name" required>
@@ -63,7 +63,7 @@
       </p>
     </form>
   </div>
-  <img src="../../assets/pictures/iligan.png" class="iligan-logo" alt="Iligan Logo">
+  <img src="/assets/pictures/iligan.png" class="iligan-logo" alt="Iligan Logo">
 </div>
 </div>
 </body>

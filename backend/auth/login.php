@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
 
             // ✅ Redirect after login
-            header("Location: ../../public/index.php");
+            header("Location: /public/index.php");
             exit;
         } else {
             echo "Incorrect password.";

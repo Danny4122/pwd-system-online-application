@@ -15,7 +15,7 @@ WORKDIR /var/www/html/PWD-Application-System
 COPY . /var/www/html/PWD-Application-System
 COPY php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
-RUN sed -ri 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/PWD-Application-System/public!g' /etc/apache2/sites-available/000-default.conf \
+RUN sed -ri 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/PWD-Application-System!g' /etc/apache2/sites-available/000-default.conf \
     && printf '%s\n' '<Directory /var/www/html/PWD-Application-System>' '    AllowOverride All' '    Require all granted' '</Directory>' >> /etc/apache2/apache2.conf
 
 EXPOSE 80

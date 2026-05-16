@@ -1,0 +1,28 @@
+RewriteEngine On
+RewriteBase /
+
+# Prevent access to .env and config files
+RewriteRule "^\.env$" - [F]
+RewriteRule "^composer\." - [F]
+RewriteRule "^config/db\.php$" - [F]
+
+# Allow actual files and directories to be accessed normally
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Route API requests
+RewriteRule "^api/(.*)" api/$1 [QSA,L]
+
+# Route auth requests
+RewriteRule "^backend/(.*)" backend/$1 [QSA,L]
+
+# Route src requests (admin, doctor, client)
+RewriteRule "^src/(.*)" src/$1 [QSA,L]
+
+# Route public files
+RewriteRule "^(login_form|logout|signup_form)\.php$" public/$1.php [QSA,L]
+RewriteRule "^public/(.*)" public/$1 [QSA,L]
+
+# Route all other requests to index.php
+RewriteRule "^(?!public/|api/|backend/|src/|assets/|uploads/|docker/|tests/).*$" index.php [QSA,L]
